@@ -15,8 +15,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --upgrade pip psutil
-      - run: python -m py_compile $(find netscope -name '*.py')
+      - run: python -m pip install --upgrade pip psutil pytest ruff
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Test
+        run: pytest
       - run: PYTHONPATH=. python -m netscope --cli --help
 
   windows:

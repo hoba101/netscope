@@ -9,7 +9,7 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
-from .i18n import get_language, t
+from .i18n import get_language
 
 
 def is_windows() -> bool:
@@ -96,15 +96,54 @@ def fmt_bytes(value: float, compact: bool = False, rate: bool = False) -> str:
     return f"{value:.2f} {suffix}"
 
 
+def fmt_rate(bits_per_second: float, unit: str = "bits") -> str:
+    """Format a link rate in bits/s, or in bytes/s when ``unit == "bytes"``."""
+    if unit == "bytes":
+        return f"{fmt_bytes(bits_per_second / 8)}/s"
+    return fmt_bytes(bits_per_second, rate=True)
+
+
 AR_MONTHS = [
-    "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-    "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+    "يناير",
+    "فبراير",
+    "مارس",
+    "أبريل",
+    "مايو",
+    "يونيو",
+    "يوليو",
+    "أغسطس",
+    "سبتمبر",
+    "أكتوبر",
+    "نوفمبر",
+    "ديسمبر",
 ]
 AR_MONTHS_SHORT = [
-    "ينا", "فبر", "مار", "أبر", "ماي", "يون", "يول", "أغس", "سبت", "أكت", "نوف", "ديس",
+    "ينا",
+    "فبر",
+    "مار",
+    "أبر",
+    "ماي",
+    "يون",
+    "يول",
+    "أغس",
+    "سبت",
+    "أكت",
+    "نوف",
+    "ديس",
 ]
 EN_MONTHS_SHORT = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
 ]
 AR_DAYS = ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"]
 EN_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]

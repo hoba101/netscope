@@ -42,12 +42,11 @@ def is_admin() -> bool:
     if is_windows():
         try:
             import ctypes  # type: ignore
+
             return bool(ctypes.windll.shell32.IsUserAnAdmin())
         except Exception:
             try:
-                out = subprocess.check_output(
-                    ["net", "session"], stderr=subprocess.DEVNULL, text=True, timeout=3
-                )
+                subprocess.check_output(["net", "session"], stderr=subprocess.DEVNULL, text=True, timeout=3)
                 return True
             except Exception:
                 return False
@@ -75,14 +74,20 @@ def scan() -> CapabilityReport:
             break
     if is_linux() and rep.has_systemctl:
         try:
-            out = subprocess.check_output(["systemctl", "is-enabled", "vnstat"], text=True, stderr=subprocess.DEVNULL, timeout=3).strip()
+            out = subprocess.check_output(
+                ["systemctl", "is-enabled", "vnstat"], text=True, stderr=subprocess.DEVNULL, timeout=3
+            ).strip()
             rep.has_vnstatd_service = out in ("enabled", "static", "indirect", "alias")
         except Exception:
             pass
     if is_linux() and not rep.has_tc:
-        rep.notes.append("iproute-tc is not installed; speed throttling via tc is unavailable until it is installed.")
+        rep.notes.append(
+            "iproute-tc is not installed; speed throttling via tc is unavailable until it is installed."
+        )
     if is_linux() and not rep.can_read_vnstat_db and rep.has_vnstat:
-        rep.notes.append("vnStat exists but its DB is not directly readable; NetScope uses vnstat JSON and can use a privileged helper for DB recovery.")
+        rep.notes.append(
+            "vnStat exists but its DB is not directly readable; NetScope uses vnstat JSON and can use a privileged helper for DB recovery."
+        )
     if is_windows() and not rep.is_admin:
         rep.notes.append("Some Windows controls (firewall/adapter actions) require Administrator consent.")
     return rep

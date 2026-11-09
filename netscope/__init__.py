@@ -4,6 +4,6 @@
 
 __all__ = ["__version__", "APP_ID", "APP_NAME"]
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 APP_ID = "io.github.hoba101.NetScope"
 APP_NAME = "NetScope"

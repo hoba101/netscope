@@ -23,6 +23,9 @@
   <provides><binary>netscope</binary></provides>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.1.0" date="2026-11-09">
+      <description><p>Redesigned desktop experience: sidebar navigation, unified preferences, background mode with native notifications, network devices page, full speed test with history, CSV export, keyboard shortcuts, and complete Arabic translations.</p></description>
+    </release>
     <release version="1.0.0" date="2026-11-09">
       <description><p>Initial professional release with history recovery, settings, Arabic/English UI, CLI, and cross-distro packaging metadata.</p></description>
     </release>

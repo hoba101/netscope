@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import subprocess
 from datetime import date, datetime
@@ -39,7 +38,11 @@ def _point(rx, tx, start, label: str, detail: str = "") -> UsagePoint:
 
 
 def read_all() -> list[UsageSnapshot]:
-    payload = _run_json()
+    return parse_payload(_run_json())
+
+
+def parse_payload(payload: dict | None) -> list[UsageSnapshot]:
+    """Convert ``vnstat --json`` output into snapshots (one per interface)."""
     if not payload:
         return []
     snapshots: list[UsageSnapshot] = []
@@ -63,11 +66,19 @@ def read_all() -> list[UsageSnapshot]:
             d = e.get("date") or {}
             t = e.get("time") or {}
             try:
-                dt = datetime(int(d["year"]), int(d["month"]), int(d["day"]), int(t.get("hour", 0)), int(t.get("minute", 0)))
+                dt = datetime(
+                    int(d["year"]),
+                    int(d["month"]),
+                    int(d["day"]),
+                    int(t.get("hour", 0)),
+                    int(t.get("minute", 0)),
+                )
             except Exception:
                 dt = _ts(e)
             label = dt.strftime("%H:%M") if dt else "?"
-            snap.fiveminute.append(_point(e.get("rx"), e.get("tx"), dt, label, dt.strftime("%Y-%m-%d %H:%M") if dt else label))
+            snap.fiveminute.append(
+                _point(e.get("rx"), e.get("tx"), dt, label, dt.strftime("%Y-%m-%d %H:%M") if dt else label)
+            )
 
         for e in traffic.get("hour") or []:
             d = e.get("date") or {}
@@ -77,7 +88,9 @@ def read_all() -> list[UsageSnapshot]:
             except Exception:
                 dt = _ts(e)
             label = dt.strftime("%H:00") if dt else "?"
-            snap.hour.append(_point(e.get("rx"), e.get("tx"), dt, label, dt.strftime("%Y-%m-%d %H:00") if dt else label))
+            snap.hour.append(
+                _point(e.get("rx"), e.get("tx"), dt, label, dt.strftime("%Y-%m-%d %H:00") if dt else label)
+            )
 
         for e in traffic.get("day") or []:
             d = e.get("date") or {}

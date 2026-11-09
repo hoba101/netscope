@@ -49,6 +49,15 @@ DEFAULTS = {
     "alert_network_change_enabled": True,
     "alerts_enabled": True,
     "alert_desktop_notify": True,
+    # Desktop app behaviour / remembered UI state
+    "run_in_background": True,
+    "autostart": False,
+    "onboarding_done": False,
+    "background_hint_shown": False,
+    "window_width": 1220,
+    "window_height": 860,
+    "window_maximized": False,
+    "last_page": "overview",
 }
 
 
@@ -91,6 +100,14 @@ class Settings:
     alert_network_change_enabled: bool = DEFAULTS["alert_network_change_enabled"]
     alerts_enabled: bool = DEFAULTS["alerts_enabled"]
     alert_desktop_notify: bool = DEFAULTS["alert_desktop_notify"]
+    run_in_background: bool = DEFAULTS["run_in_background"]
+    autostart: bool = DEFAULTS["autostart"]
+    onboarding_done: bool = DEFAULTS["onboarding_done"]
+    background_hint_shown: bool = DEFAULTS["background_hint_shown"]
+    window_width: int = DEFAULTS["window_width"]
+    window_height: int = DEFAULTS["window_height"]
+    window_maximized: bool = DEFAULTS["window_maximized"]
+    last_page: str = DEFAULTS["last_page"]
 
     @classmethod
     def path(cls) -> Path:
@@ -98,7 +115,7 @@ class Settings:
         return config_dir() / "settings.json"
 
     @classmethod
-    def load(cls) -> "Settings":
+    def load(cls) -> Settings:
         path = cls.path()
         data = dict(DEFAULTS)
         try:
@@ -132,8 +149,27 @@ class Settings:
         data["alert_hourly_warn_percent"] = max(1, min(100, int(data.get("alert_hourly_warn_percent", 80))))
         data["alert_low_speed_kbps"] = max(1, min(10_000_000, int(data.get("alert_low_speed_kbps", 256))))
         data["alert_low_speed_seconds"] = max(3, min(3600, int(data.get("alert_low_speed_seconds", 20))))
-        for b in ("alert_daily_enabled","alert_hourly_enabled","alert_low_speed_enabled","alert_disconnect_enabled","alert_network_change_enabled","alerts_enabled","alert_desktop_notify"):
+        for b in (
+            "alert_daily_enabled",
+            "alert_hourly_enabled",
+            "alert_low_speed_enabled",
+            "alert_disconnect_enabled",
+            "alert_network_change_enabled",
+            "alerts_enabled",
+            "alert_desktop_notify",
+        ):
             data[b] = bool(data.get(b, DEFAULTS[b]))
+        data["window_width"] = max(360, min(10_000, int(data.get("window_width", 1220))))
+        data["window_height"] = max(360, min(10_000, int(data.get("window_height", 860))))
+        for b in (
+            "run_in_background",
+            "autostart",
+            "onboarding_done",
+            "background_hint_shown",
+            "window_maximized",
+        ):
+            data[b] = bool(data.get(b, DEFAULTS[b]))
+        data["last_page"] = str(data.get("last_page") or "overview")
         return cls(**{k: data.get(k, v) for k, v in DEFAULTS.items()})
 
     def save(self) -> None:
