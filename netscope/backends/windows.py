@@ -10,7 +10,6 @@ own history over time and can display what the OS/API provides.
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import time
 from dataclasses import dataclass
@@ -44,7 +43,9 @@ def list_interfaces() -> list[str]:
     if psutil is not None:
         try:
             stats = psutil.net_io_counters(pernic=True)
-            names = sorted(stats.keys(), key=lambda n: (n.lower().startswith("loopback"), n.lower() == "lo", n))
+            names = sorted(
+                stats.keys(), key=lambda n: (n.lower().startswith("loopback"), n.lower() == "lo", n)
+            )
             return names
         except Exception:
             pass
@@ -54,7 +55,9 @@ def list_interfaces() -> list[str]:
 def _powershell_interfaces() -> list[str]:
     try:
         cmd = [
-            "powershell", "-NoProfile", "-Command",
+            "powershell",
+            "-NoProfile",
+            "-Command",
             "Get-NetAdapter | Select-Object -ExpandProperty Name | ConvertTo-Json -Compress",
         ]
         raw = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL, timeout=10)
@@ -79,8 +82,7 @@ def read_counters(iface: str | None = None) -> tuple[str, int, int] | None:
                 return iface, int(s.bytes_recv), int(s.bytes_sent)
             # pick most active non-loopback
             candidates = [
-                (n, s) for n, s in stats.items()
-                if "loopback" not in n.lower() and n.lower() != "lo"
+                (n, s) for n, s in stats.items() if "loopback" not in n.lower() and n.lower() != "lo"
             ]
             if not candidates:
                 candidates = list(stats.items())
@@ -96,7 +98,9 @@ def _powershell_counters(iface: str | None) -> tuple[str, int, int] | None:
     try:
         name_filter = f"-Name '{iface}'" if iface else ""
         cmd = [
-            "powershell", "-NoProfile", "-Command",
+            "powershell",
+            "-NoProfile",
+            "-Command",
             f"Get-NetAdapterStatistics {name_filter} | Select-Object Name,ReceivedBytes,SentBytes | ConvertTo-Json -Compress",
         ]
         raw = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL, timeout=10)
@@ -104,7 +108,11 @@ def _powershell_counters(iface: str | None) -> tuple[str, int, int] | None:
         if isinstance(data, list):
             data = data[0] if data else None
         if isinstance(data, dict):
-            return str(data.get("Name", iface or "?")), int(data.get("ReceivedBytes", 0)), int(data.get("SentBytes", 0))
+            return (
+                str(data.get("Name", iface or "?")),
+                int(data.get("ReceivedBytes", 0)),
+                int(data.get("SentBytes", 0)),
+            )
     except Exception:
         pass
     return None

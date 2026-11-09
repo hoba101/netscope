@@ -13,6 +13,9 @@ fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo "Installing NetScope to $PREFIX"
 $SUDO mkdir -p "$PREFIX/lib/netscope" "$PREFIX/bin" "$PREFIX/share/applications" "$PREFIX/share/icons/hicolor/scalable/apps" "$PREFIX/share/metainfo"
+# Replace the previous copy completely so removed modules do not linger.
+$SUDO rm -rf "$PREFIX/lib/netscope/netscope"
+$SUDO mkdir -p "$PREFIX/lib/netscope"
 $SUDO cp -a "$ROOT/netscope" "$PREFIX/lib/netscope/"
 $SUDO install -Dm755 /dev/stdin "$PREFIX/bin/netscope" <<EOF
 #!/usr/bin/env bash

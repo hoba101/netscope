@@ -44,6 +44,14 @@ CREATE TABLE IF NOT EXISTS alerts (
   seen INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_alerts_ts ON alerts(ts DESC);
+CREATE TABLE IF NOT EXISTS speedtests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts TEXT NOT NULL,
+  interface TEXT DEFAULT '',
+  ping_ms REAL,
+  down_mbps REAL,
+  up_mbps REAL
+);
 CREATE TABLE IF NOT EXISTS alert_state (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
@@ -134,16 +142,37 @@ def read_snapshot(iface: str) -> UsageSnapshot | None:
             updated = datetime.fromisoformat(row["updated"]) if row["updated"] else None
         except Exception:
             pass
-        info = InterfaceInfo(name=row["name"], alias=row["alias"] or "", created=created, updated=updated, source=row["source"] or "netscope")
+        info = InterfaceInfo(
+            name=row["name"],
+            alias=row["alias"] or "",
+            created=created,
+            updated=updated,
+            source=row["source"] or "netscope",
+        )
         snap = UsageSnapshot(interface=info, sources=["NetScope history"])
-        for period, attr in (("fiveminute", "fiveminute"), ("hour", "hour"), ("day", "day"), ("month", "month"), ("year", "year"), ("top", "top")):
+        for period, attr in (
+            ("fiveminute", "fiveminute"),
+            ("hour", "hour"),
+            ("day", "day"),
+            ("month", "month"),
+            ("year", "year"),
+            ("top", "top"),
+        ):
             rows = conn.execute(
                 "SELECT start, SUM(rx) rx, SUM(tx) tx FROM usage WHERE interface=? AND period=? GROUP BY start ORDER BY start",
                 (iface, period),
             ).fetchall()
             for r in rows:
                 start = _parse_start(period, r["start"])
-                getattr(snap, attr).append(UsagePoint(rx=int(r["rx"] or 0), tx=int(r["tx"] or 0), start=start, label=str(r["start"]), detail=str(r["start"])))
+                getattr(snap, attr).append(
+                    UsagePoint(
+                        rx=int(r["rx"] or 0),
+                        tx=int(r["tx"] or 0),
+                        start=start,
+                        label=str(r["start"]),
+                        detail=str(r["start"]),
+                    )
+                )
         return snap
 
 
@@ -161,12 +190,23 @@ def _parse_start(period: str, value: str):
         return value
 
 
-def add_alert(kind: str, severity: str, title: str, message: str, interface: str = "", value: str = "", dedup_key: str = "", cooldown_sec: int = 0) -> bool:
+def add_alert(
+    kind: str,
+    severity: str,
+    title: str,
+    message: str,
+    interface: str = "",
+    value: str = "",
+    dedup_key: str = "",
+    cooldown_sec: int = 0,
+) -> bool:
     """Insert alert unless dedup/cooldown suppresses it. Returns True if inserted."""
     now = datetime.now().isoformat(timespec="seconds")
     with closing(connect()) as conn:
         if dedup_key and cooldown_sec > 0:
-            row = conn.execute("SELECT value FROM alert_state WHERE key=?", (f"cooldown:{dedup_key}",)).fetchone()
+            row = conn.execute(
+                "SELECT value FROM alert_state WHERE key=?", (f"cooldown:{dedup_key}",)
+            ).fetchone()
             if row:
                 try:
                     last = datetime.fromisoformat(row[0])
@@ -179,8 +219,14 @@ def add_alert(kind: str, severity: str, title: str, message: str, interface: str
             (now, kind, severity, interface, title, message, value),
         )
         if dedup_key:
-            conn.execute("INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (f"cooldown:{dedup_key}", now))
-            conn.execute("INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (f"last:{dedup_key}", value or message))
+            conn.execute(
+                "INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (f"cooldown:{dedup_key}", now),
+            )
+            conn.execute(
+                "INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                (f"last:{dedup_key}", value or message),
+            )
         conn.commit()
     return True
 
@@ -207,7 +253,8 @@ def mark_alerts_seen(ids=None):
 
 def clear_alerts():
     with closing(connect()) as conn:
-        conn.execute("DELETE FROM alerts"); conn.commit()
+        conn.execute("DELETE FROM alerts")
+        conn.commit()
 
 
 def get_state(key: str):
@@ -218,5 +265,28 @@ def get_state(key: str):
 
 def set_state(key: str, value: str):
     with closing(connect()) as conn:
-        conn.execute("INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", (key, str(value)))
+        conn.execute(
+            "INSERT INTO alert_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            (key, str(value)),
+        )
         conn.commit()
+
+
+def add_speedtest(
+    interface: str, ping_ms: float | None, down_mbps: float | None, up_mbps: float | None
+) -> None:
+    with closing(connect()) as conn:
+        conn.execute(
+            "INSERT INTO speedtests(ts, interface, ping_ms, down_mbps, up_mbps) VALUES(?,?,?,?,?)",
+            (datetime.now().isoformat(timespec="seconds"), interface, ping_ms, down_mbps, up_mbps),
+        )
+        conn.commit()
+
+
+def list_speedtests(limit: int = 20) -> list[dict]:
+    with closing(connect()) as conn:
+        rows = conn.execute(
+            "SELECT ts, interface, ping_ms, down_mbps, up_mbps FROM speedtests ORDER BY id DESC LIMIT ?",
+            (max(1, min(500, int(limit))),),
+        ).fetchall()
+        return [dict(r) for r in rows]

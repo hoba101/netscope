@@ -1,5 +1,5 @@
 Name:           netscope
-Version:        1.0.0
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Professional network usage monitor with history recovery
 
@@ -11,9 +11,12 @@ BuildArch:      noarch
 BuildRequires:  python3-devel
 Requires:       python3 >= 3.10
 Requires:       python3-gobject
-Requires:       gtk4
-Requires:       libadwaita
+Requires:       gtk4 >= 4.12
+Requires:       libadwaita >= 1.6
 Recommends:     vnstat
+Recommends:     iproute-tc
+Recommends:     NetworkManager
+Recommends:     polkit
 
 %description
 NetScope tracks live and historical network usage, integrates with vnStat,
@@ -45,5 +48,9 @@ install -m 0644 io.github.hoba101.NetScope.metainfo.xml %{buildroot}%{_datadir}/
 %{_datadir}/metainfo/io.github.hoba101.NetScope.metainfo.xml
 
 %changelog
+* Mon Nov 09 2026 miro (hoba101) <hoba101@users.noreply.github.com> - 1.1.0-1
+- Redesigned desktop app: sidebar navigation, unified preferences, background mode
+- Network devices page, speed test with upload and history, CSV export
+- Arabic translations for alerts and diagnostics; many fixes
 * Mon Nov 09 2026 miro (hoba101) <hoba101@users.noreply.github.com> - 1.0.0-1
 - Initial professional release

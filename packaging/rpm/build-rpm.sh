@@ -25,7 +25,7 @@ fi
 
 mkdir -p "$RPMTOP"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 rm -rf "$TOP"; mkdir -p "$TOP/$NAME-$VER"
-tar -C "$ROOT" --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' --exclude='dist' --exclude='build' --exclude='*.bak' --exclude='.flatpak-builder' --exclude='flatpak-build' -cf - . | tar -C "$TOP/$NAME-$VER" -xf -
+tar -C "$ROOT" --exclude='.git' --exclude='.venv' --exclude='.pytest_cache' --exclude='.ruff_cache' --exclude='__pycache__' --exclude='*.pyc' --exclude='dist' --exclude='build' --exclude='*.bak' --exclude='.flatpak-builder' --exclude='flatpak-build' -cf - . | tar -C "$TOP/$NAME-$VER" -xf -
 tar -C "$TOP" -czf "$RPMTOP/SOURCES/$TARBALL" "$NAME-$VER"
 cp "$ROOT/packaging/rpm/netscope.spec" "$RPMTOP/SPECS/"
 # keep Version in spec aligned (simple check)

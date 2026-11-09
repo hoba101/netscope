@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
 
+from .i18n import t
+from .series import usage_today
 from .settings import Settings
 
 
@@ -23,13 +24,8 @@ class QuotaStatus:
 
 
 def today_usage_bytes(snap) -> int:
-    today = date.today()
-    for p in reversed(getattr(snap, "day", []) or []):
-        d = p.start
-        if hasattr(d, "date"): d = d.date()
-        if isinstance(d, date) and d == today:
-            return int(p.rx) + int(p.tx)
-    return 0
+    point = usage_today(snap)
+    return int(point.rx) + int(point.tx) if point else 0
 
 
 def evaluate(snap, settings: Settings) -> QuotaStatus:
@@ -41,8 +37,9 @@ def evaluate(snap, settings: Settings) -> QuotaStatus:
     warn = pct >= warn_at
     exceeded = used >= limit
     msg = ""
-    if exceeded:
-        msg = f"Daily quota exceeded: {pct:.1f}% of {settings.quota_daily_mb} MB used on {iface}."
-    elif warn:
-        msg = f"Daily quota warning: {pct:.1f}% of {settings.quota_daily_mb} MB used on {iface}."
-    return QuotaStatus(bool(settings.quota_enabled), iface, used, limit, pct, warn, exceeded, settings.quota_action, msg)
+    if exceeded or warn:
+        key = "quota.msg_exceeded" if exceeded else "quota.msg_warn"
+        msg = t(key, percent=f"{pct:.1f}", limit=settings.quota_daily_mb, iface=iface)
+    return QuotaStatus(
+        bool(settings.quota_enabled), iface, used, limit, pct, warn, exceeded, settings.quota_action, msg
+    )

@@ -3,13 +3,11 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
-
+from .. import storage
 from ..models import InterfaceInfo, UsagePoint, UsageSnapshot
 from ..settings import Settings
 from ..utils import is_linux, is_windows
 from . import linux_sysfs, vnstat_db, vnstat_json, windows
-from .. import storage
 
 
 def list_interfaces(settings: Settings | None = None) -> list[str]:
@@ -96,7 +94,9 @@ def collect_snapshot(selected: str = "", settings: Settings | None = None) -> Us
         snap = UsageSnapshot(
             interface=InterfaceInfo(name=iface, total_rx=rx, total_tx=tx, source="sysfs"),
             sources=["Linux counters"],
-            notes=["No vnStat history was found. Install and enable vnstatd for automatic long-term history."],
+            notes=[
+                "No vnStat history was found. Install and enable vnstatd for automatic long-term history."
+            ],
         )
 
     if snap is None:
@@ -113,9 +113,13 @@ def collect_snapshot(selected: str = "", settings: Settings | None = None) -> Us
             for src in s.sources:
                 if src not in merged.sources:
                     merged.sources.append(src)
-            if s.interface.created and (not merged.interface.created or s.interface.created < merged.interface.created):
+            if s.interface.created and (
+                not merged.interface.created or s.interface.created < merged.interface.created
+            ):
                 merged.interface.created = s.interface.created
-            if s.interface.updated and (not merged.interface.updated or s.interface.updated > merged.interface.updated):
+            if s.interface.updated and (
+                not merged.interface.updated or s.interface.updated > merged.interface.updated
+            ):
                 merged.interface.updated = s.interface.updated
             merged.interface.total_rx = max(merged.interface.total_rx, s.interface.total_rx)
             merged.interface.total_tx = max(merged.interface.total_tx, s.interface.total_tx)
@@ -164,6 +168,10 @@ def _select(snapshots: list[UsageSnapshot], selected: str) -> UsageSnapshot | No
                 return snap
     snapshots = sorted(
         snapshots,
-        key=lambda s: (s.interface.name == "lo", -(len(s.day) + len(s.month) + len(s.hour)), -s.interface.total_rx - s.interface.total_tx),
+        key=lambda s: (
+            s.interface.name == "lo",
+            -(len(s.day) + len(s.month) + len(s.hour)),
+            -s.interface.total_rx - s.interface.total_tx,
+        ),
     )
     return snapshots[0]
