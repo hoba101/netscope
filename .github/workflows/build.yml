@@ -1,0 +1,51 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --upgrade pip psutil
+      - run: python -m py_compile $(find netscope -name '*.py')
+      - run: PYTHONPATH=. python -m netscope --cli --help
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip pyinstaller psutil
+          python -m PyInstaller --noconfirm --clean --name NetScope --onefile -m netscope
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NetScope-windows
+          path: dist/NetScope*.exe
+
+  deb-tree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare .deb tree/build
+        run: |
+          bash packaging/deb/build-deb.sh || true
+          find dist -maxdepth 2 -type f -print
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: NetScope-deb
+          path: dist

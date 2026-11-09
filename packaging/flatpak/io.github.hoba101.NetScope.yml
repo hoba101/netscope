@@ -1,0 +1,38 @@
+app-id: io.github.hoba101.NetScope
+runtime: org.gnome.Platform
+runtime-version: '48'
+sdk: org.gnome.Sdk
+command: netscope
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --share=network
+  # vnStat history access (host files vary by distro). For full old-data recovery,
+  # prefer the native package or grant access explicitly on the target system.
+  - --filesystem=/var/lib/vnstat:ro
+  - --filesystem=/var/db/vnstat:ro
+  - --filesystem=xdg-config/netscope:create
+  - --filesystem=xdg-data/netscope:create
+  - --filesystem=xdg-cache/netscope:create
+modules:
+  - name: netscope
+    buildsystem: simple
+    build-commands:
+      - install -d /app/lib/netscope /app/bin /app/share/applications /app/share/icons/hicolor/scalable/apps /app/share/metainfo
+      - cp -a netscope /app/lib/netscope/
+      - |
+        cat > /app/bin/netscope << 'EOF'
+        #!/usr/bin/env bash
+        export PYTHONPATH=/app/lib/netscope${PYTHONPATH:+:$PYTHONPATH}
+        exec /usr/bin/python3 -m netscope "$@"
+        EOF
+      - chmod 755 /app/bin/netscope
+      - install -Dm644 netscope.desktop /app/share/applications/io.github.hoba101.NetScope.desktop
+      - sed -i 's|^Exec=.*|Exec=netscope|' /app/share/applications/io.github.hoba101.NetScope.desktop
+      - install -Dm644 assets/icons/hicolor/scalable/apps/io.github.hoba101.NetScope.svg /app/share/icons/hicolor/scalable/apps/io.github.hoba101.NetScope.svg
+      - install -Dm644 io.github.hoba101.NetScope.metainfo.xml /app/share/metainfo/io.github.hoba101.NetScope.metainfo.xml
+    sources:
+      - type: dir
+        path: ../..

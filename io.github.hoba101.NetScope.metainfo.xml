@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.hoba101.NetScope</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>NetScope</name>
+  <name xml:lang="ar">نت سكوب</name>
+  <summary>Professional network usage analytics with history recovery</summary>
+  <summary xml:lang="ar">تحليلات احترافية لاستهلاك الشبكة مع استعادة السجل القديم</summary>
+  <description>
+    <p>NetScope monitors network usage across Linux and Windows. It reads live counters, shows real-time speed, and presents monthly, daily, hourly, 5-minute, yearly, and top-day usage.</p>
+    <p xml:lang="ar">NetScope يراقب استهلاك الشبكة على لينكس وويندوز. يعرض العدادات المباشرة والسرعة اللحظية والاستهلاك الشهري واليومي والساعي وكل 5 دقائق والسنوي وأكثر الأيام استهلاكًا.</p>
+    <p>On Linux, NetScope integrates with vnStat and can recover old stored vnStat database history when available, so you can understand past usage instead of starting from zero.</p>
+    <p xml:lang="ar">على لينكس، يتكامل NetScope مع vnStat ويمكنه استعادة بيانات قاعدة بيانات vnStat القديمة المخزنة عندما تكون متاحة، حتى تعرف استهلاكك السابق بدلًا من البدء من الصفر.</p>
+  </description>
+  <launchable type="desktop-id">io.github.hoba101.NetScope.desktop</launchable>
+  <developer id="io.github.hoba101">
+    <name>miro (hoba101)</name>
+  </developer>
+  <url type="homepage">https://github.com/hoba101/netscope</url>
+  <url type="bugtracker">https://github.com/hoba101/netscope/issues</url>
+  <url type="vcs-browser">https://github.com/hoba101/netscope</url>
+  <provides><binary>netscope</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-11-09">
+      <description><p>Initial professional release with history recovery, settings, Arabic/English UI, CLI, and cross-distro packaging metadata.</p></description>
+    </release>
+  </releases>
+  <categories>
+    <category>Network</category><category>System</category><category>Monitor</category>
+  </categories>
+  <keywords>
+    <keyword>network</keyword><keyword>bandwidth</keyword><keyword>usage</keyword><keyword>vnstat</keyword><keyword>internet</keyword>
+  </keywords>
+</component>

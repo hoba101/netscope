@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netscope"
+version = "1.0.0"
+description = "Professional cross-platform network usage monitor with history recovery"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [
+  { name = "miro", email = "hoba101@users.noreply.github.com" }
+]
+keywords = ["network", "usage", "vnstat", "linux", "windows", "monitor", "bandwidth"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: X11 Applications :: GTK",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Topic :: System :: Networking :: Monitoring",
+]
+dependencies = [
+  "psutil>=5.9; platform_system == 'Windows'",
+]
+
+[project.optional-dependencies]
+gui = ["PyGObject>=3.42"]
+windows = ["psutil>=5.9"]
+dev = ["pytest", "ruff", "build", "pyinstaller"]
+
+[project.urls]
+Homepage = "https://github.com/hoba101/netscope"
+Repository = "https://github.com/hoba101/netscope"
+Issues = "https://github.com/hoba101/netscope/issues"
+
+[project.scripts]
+netscope = "netscope.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["netscope*"]
+
+[tool.setuptools.package-data]
+netscope = ["data/locales/*.json", "data/icons/*", "data/*.svg"]

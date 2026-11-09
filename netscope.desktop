@@ -1,0 +1,19 @@
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=NetScope
+Name[ar]=نت سكوب
+GenericName=Network Usage Monitor
+GenericName[ar]=مراقب استهلاك الشبكة
+Comment=Professional network usage analytics with history recovery
+Comment[ar]=تحليلات احترافية لاستهلاك الشبكة مع استعادة السجل القديم
+Exec=netscope
+TryExec=/home/miro/.local/bin/netscope --gui
+Icon=io.github.hoba101.NetScope
+Terminal=false
+Categories=Network;System;Monitor;
+Keywords=network;traffic;bandwidth;usage;vnstat;internet;monitor;history;data;
+Keywords[ar]=شبكة;استهلاك;إنترنت;بيانات;سرعة;سجل;
+StartupNotify=true
+StartupWMClass=io.github.hoba101.NetScope
+X-GNOME-UsesNotifications=false
